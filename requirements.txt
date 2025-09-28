@@ -1,0 +1,12 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+torch
+fastapi
+uvicorn
+pymongo
+sqlalchemy
+psycopg2-binary
+streamlit
