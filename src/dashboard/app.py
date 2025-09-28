@@ -1,21 +1,29 @@
 import streamlit as st
-import requests
+import joblib
+import pandas as pd
+import os
 
+# --- Page Config ---
 st.set_page_config(
     page_title="Hospital Resource Demand Forecaster",
     page_icon="🏥",
     layout="centered",
 )
 
+# --- Model load ---
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  
+MODEL_PATH = os.path.join(BASE_DIR, "models", "rf_model.pkl")
+model = joblib.load(MODEL_PATH)
+
+# --- UI Styling ---
 st.markdown("""
     <style>
         .main { padding-top: 2rem; }
-       
         .stTextInput > div > div > input,
         .stNumberInput > div > div > input {
             border-radius: 10px;
         }
-        div.stButton > button{
+        div.stButton > button {
             background-color: #4CAF50;
             color: white;
             border-radius: 12px;
@@ -23,7 +31,7 @@ st.markdown("""
             font-size: 1.1rem;
             transition: background-color 0.3s ease;
         }
-        div.stButton > button:first-child:hover {
+        div.stButton > button:hover {
             background-color: #45a049;
         }
     </style>
@@ -46,25 +54,9 @@ with col2:
         step=1
     )
 
-st.markdown("</div>", unsafe_allow_html=True)
-
 if st.button("🔮 Predict Next-Day ICU Demand"):
-    try:
-        resp = requests.get(
-            "http://127.0.0.1:8000/predict",
-            params={
-                "hospital_id": hospital_id,
-                "icu_admissions_lag1": icu_admissions_lag1
-            },
-            timeout=10
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        st.success(
-            f"✅ **Predicted ICU admissions for {hospital_id}: "
-            f"{data['predicted_icu_admissions']}**"
-        )
-    except requests.exceptions.RequestException:
-        st.error("⚠️ Could not reach the prediction API. Make sure the backend is running.")
-    except KeyError:
-        st.error("⚠️ Unexpected response format from the API.")
+    X = pd.DataFrame([{"icu_admissions_lag1": icu_admissions_lag1}])
+    y_pred = model.predict(X)[0]
+    st.success(
+        f"✅ **Predicted ICU admissions for {hospital_id}: {y_pred:.0f}**"
+    )
