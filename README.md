@@ -1,4 +1,4 @@
- ##🏥 Hospital Resource Demand Forecaster
+**🏥 Hospital Resource Demand Forecaster**
 
 A **FastAPI + Streamlit** application that predicts **next-day ICU admissions** for hospitals  
 based on historical ICU admission data.
